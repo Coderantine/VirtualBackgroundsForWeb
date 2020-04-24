@@ -1,0 +1,10 @@
+{
+  "env": {
+    "browser": true,
+    "webextensions": true
+  },
+  "extends": [
+    "@abhijithvijayan/eslint-config"
+  ],
+  "rules": {}
+}
