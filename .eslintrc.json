@@ -4,7 +4,7 @@
     "webextensions": true
   },
   "extends": [
-    "@abhijithvijayan/eslint-config"
+    "google"
   ],
   "rules": {}
 }

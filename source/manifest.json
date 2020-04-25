@@ -46,6 +46,7 @@
     "__chrome|opera__persistent": false
   },
   "content_scripts": [{
+    "run_at": "document_start",
     "matches": [
       "*://meet.google.com/*"
     ],
