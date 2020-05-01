@@ -1,18 +1,14 @@
 var realUserMediaCall = window.navigator.mediaDevices.getUserMedia;
 
 window.navigator.mediaDevices.getUserMedia = async function (constraints) {
-  debugger;
-  console.log("GetUserMedia was called with constraints:");
-  console.log(constraints);
-
   if (constraints.video.deviceId) {
     var canvas = document.getElementById("sourceCanvas");
-    console.log(canvas);
+    canvas.parentNode.removeChild(canvas);
     var stream = await realUserMediaCall.call(
       navigator.mediaDevices,
       constraints
     );
-    var res = canvas.captureStream();
+    var res = canvas.captureStream(60);
     var videoTrack = res.getVideoTracks()[0];
     var videoTrackStop = videoTrack.stop;
     videoTrack.stop = function () {

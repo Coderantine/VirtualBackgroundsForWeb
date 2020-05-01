@@ -1,15 +1,14 @@
 {
   "manifest_version": 2,
-  "name": "VirtualBackgroundsForWeb",
-  "version": "0.0.0",
-  "description": "VirtualBackgroundsForWeb",
+  "name": "Virtual backgrounds for Google Meet",
+  "version": "0.0.1",
+  "description": "Virtual backgrounds for Google Meet",
   "homepage_url": "https://github.com/babgev/VirtualBackgroundsForWeb",
-  "short_name": "VirtualBackgroundsForWeb",
+  "short_name": "VirtualBackgroundsForMeet",
   "permissions": [
     "storage",
     "https://meet.google.com/"
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "__chrome|firefox__author": "Coderantine",
   "__opera__developer": {
     "name": "Coderantine"
@@ -24,20 +23,14 @@
   "browser_action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "assets/icons/favicon-16.png",
-      "32": "assets/icons/favicon-32.png",
-      "48": "assets/icons/favicon-48.png",
-      "128": "assets/icons/favicon-128.png"
+      "16": "assets/icons/logo-16.png",
+      "32": "assets/icons/logo-32.png",
+      "48": "assets/icons/logo-48.png",
+      "128": "assets/icons/logo-128.png"
     },
-    "default_title": "VirtualBackgroundsForWeb",
+    "default_title": "Virtual backgrounds for Google Meet",
     "__chrome|opera__chrome_style": false,
     "__firefox__browser_style": false
-  },
-  "__chrome|opera__options_page": "options.html",
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true,
-    "__chrome__chrome_style": false
   },
   "background": {
     "scripts": [
@@ -54,5 +47,6 @@
       "js/contentScript.bundle.js"
     ]
   }],
-  "web_accessible_resources": ["js/mediaSourceSwap.js"]
+  "web_accessible_resources": ["js/mediaSourceSwap.js"],
+  "content_security_policy": "script-src 'self' https://unpkg.com; object-src 'self';"
 }

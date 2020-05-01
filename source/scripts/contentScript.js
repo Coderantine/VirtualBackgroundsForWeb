@@ -7,16 +7,19 @@ const state = {
   net: null,
   canvas: null,
   backgroundImage: null,
+  backgroundSrc: null,
+  gameIsOn: true,
 };
 
 async function overrideGetUserMedia() {
-  injectMediaSourceSwap();
-
+  
   var canvas = document.createElement("canvas");
   canvas.setAttribute("id", "sourceCanvas");
   canvas.setAttribute("style", "display:none");
   document.documentElement.appendChild(canvas);
   state.canvas = canvas;
+
+  injectMediaSourceSwap();
 
   // set up the mutation observer
   var observer = new MutationObserver(function (mutations, me) {
@@ -52,15 +55,10 @@ function toMask(personOrPartSegmentation) {
   }
   var width = multiPersonOrPartSegmentation[0].width;
   var height = multiPersonOrPartSegmentation[0].height;
-  var bytes = new Uint8ClampedArray(width * height * 4);
-  var imageData = state.image.data;
+  var bytes = new Uint8ClampedArray(state.image.data);
   for (var i = 0; i < height; i += 1) {
     for (var j = 0; j < width; j += 1) {
       var n = i * width + j;
-      bytes[4 * n + 0] = imageData[4 * n + 0];
-      bytes[4 * n + 1] = imageData[4 * n + 1];
-      bytes[4 * n + 2] = imageData[4 * n + 2];
-      bytes[4 * n + 3] = imageData[4 * n + 3];
       for (var k = 0; k < multiPersonOrPartSegmentation.length; k++) {
         if (multiPersonOrPartSegmentation[k].data[n] == 1) {
           bytes[4 * n] = 0;
@@ -82,6 +80,8 @@ function realVideoAdded(video) {
     background.setAttribute("style", "object-fit: cover");
     state.video.width = state.video.videoWidth;
     state.video.height = state.video.videoHeight;
+    state.canvas.width = state.video.width;
+    state.canvas.height = state.video.height;
     background.height = state.video.height;
     background.width = state.video.width;
     background.crossOrigin = "Anonymous";
@@ -90,17 +90,7 @@ function realVideoAdded(video) {
       imageCanvas.width = background.width;
       imageCanvas.height = background.height;
       var ctx = imageCanvas.getContext("2d");
-      ctx.drawImage(
-        background,
-        0,
-        0,
-        background.width,
-        background.height,
-        0,
-        0,
-        background.width,
-        background.height
-      );
+      ctx.drawImage(background, 0, 0, background.width, background.height);
 
       var imgWidth = background.width || background.naturalWidth;
       var imgHeight = background.height || background.naturalHeight;
@@ -112,15 +102,21 @@ function realVideoAdded(video) {
     };
 
     background.src =
-      "https://images.unsplash.com/photo-1573871891393-45521a8e8d85?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=" +
-      state.video.width +
-      "&q=80";
+      state.backgroundSrc.split("&w=")[0] + "&fit=crop&w=" + state.video.width;
   };
 }
 
 async function start() {
+  await loadState();
   overrideGetUserMedia();
   await loadBodyPix();
+}
+
+async function loadState() {
+  state.gameIsOn = (await browser.storage.sync.get(["gameIsOn"])).gameIsOn;
+  state.backgroundSrc = (
+    await browser.storage.sync.get(["backgroundSrc"])
+  ).backgroundSrc;
 }
 
 function injectMediaSourceSwap() {
@@ -135,10 +131,26 @@ function injectMediaSourceSwap() {
 
 function segmentBodyInRealTime() {
   async function bodySegmentationFrame() {
-    var multiPersonSegmentation = await estimateSegmentation();
-    if (multiPersonSegmentation) {
-      const mask = toMask(multiPersonSegmentation);
-      bodyPix.drawMask(state.canvas, state.video, mask, 1, 2, false);
+    if (state.gameIsOn) {
+      var multiPersonSegmentation = await estimateSegmentation();
+      if (multiPersonSegmentation) {
+        const mask = toMask(multiPersonSegmentation);
+
+        // const ctx = state.canvas.getContext("2d");
+        // ctx.globalAlpha = 1;
+        // ctx.save();
+        // ctx.drawImage(state.video, 0, 0);
+        // bodyPix.drawi
+        // ctx.globalCompositeOperation = "source-in";
+        // ctx.putImageData(mask,0,0);
+        
+        // ctx.restore();
+
+        bodyPix.drawMask(state.canvas, state.video, mask, 1, 0, false);
+      }
+    } else {
+      var ctx = state.canvas.getContext("2d");
+      ctx.drawImage(state.video, 0, 0);
     }
 
     requestAnimationFrame(bodySegmentationFrame);
@@ -165,12 +177,15 @@ async function estimateSegmentation() {
   });
 }
 
-browser.storage.onChanged.addListener(function(changes) {
-  if(changes["backgroundSrc"]) {
-      state.backgroundImage.src = changes["backgroundSrc"].newValue.split("&w=")[0] + "&fit=max&w=" +
-      state.video.width +
-      "&q=80";
+browser.storage.onChanged.addListener(function (changes) {
+  if (changes["backgroundSrc"]) {
+    state.backgroundImage.src =
+      changes["backgroundSrc"].newValue.split("&w=")[0] +
+      "&fit=crop&w=" +
+      state.video.width;
+  }
+  if (changes["gameIsOn"]) {
+    state.gameIsOn = changes["gameIsOn"].newValue;
   }
 });
-
 start();
