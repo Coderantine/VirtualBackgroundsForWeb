@@ -3,7 +3,6 @@ var realUserMediaCall = window.navigator.mediaDevices.getUserMedia;
 window.navigator.mediaDevices.getUserMedia = async function (constraints) {
   if (constraints.video.deviceId) {
     var canvas = document.getElementById("sourceCanvas");
-    canvas.parentNode.removeChild(canvas);
     var stream = await realUserMediaCall.call(
       navigator.mediaDevices,
       constraints

@@ -1,5 +1,6 @@
 import * as bodyPix from "@tensorflow-models/body-pix";
 import browser from "webextension-polyfill";
+import { debug } from "webpack";
 
 const state = {
   video: null,
@@ -74,6 +75,12 @@ function toMask(personOrPartSegmentation) {
 
 function realVideoAdded(video) {
   state.video = video;
+  function outputsize() {
+    state.backgroundImage.width = state.video.width
+    state.backgroundImage.height = state.video.height
+   }   
+  new ResizeObserver(outputsize).observe(state.video)
+
   video.onloadedmetadata = function () {
     var background = new Image();
     state.backgroundImage = background;
@@ -101,8 +108,7 @@ function realVideoAdded(video) {
       segmentBodyInRealTime();
     };
 
-    background.src =
-      state.backgroundSrc.split("&w=")[0] + "&fit=crop&w=" + state.video.width;
+    background.src = state.backgroundSrc;
   };
 }
 
@@ -179,10 +185,19 @@ async function estimateSegmentation() {
 
 browser.storage.onChanged.addListener(function (changes) {
   if (changes["backgroundSrc"]) {
-    state.backgroundImage.src =
-      changes["backgroundSrc"].newValue.split("&w=")[0] +
-      "&fit=crop&w=" +
-      state.video.width;
+    debugger;
+    var backgroundImg = changes["backgroundSrc"].newValue;
+    var backgroundImgSource = backgroundImg.src;
+    if (!backgroundImg.isCustom){
+      backgroundImgSource = backgroundImgSource.split("&w=")[0] +
+                                              "&fit=crop&w=" +
+                                              state.video.width;
+    }
+
+    state.backgroundSrc = backgroundImgSource;
+    state.backgroundImage.src = backgroundImgSource;
+    state.backgroundImage.height = state.video.height;
+    state.backgroundImage.width = state.video.width;
   }
   if (changes["gameIsOn"]) {
     state.gameIsOn = changes["gameIsOn"].newValue;
