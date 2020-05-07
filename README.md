@@ -2,4 +2,4 @@
 
 Allows to use images as a background during Google Meet calls
 
-<h2>Screenshots</h2>
+![](https://github.com/Coderantine/VirtualBackgroundsForWeb/blob/master/assets/bbc.gif)
