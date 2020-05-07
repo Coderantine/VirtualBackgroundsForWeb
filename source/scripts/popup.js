@@ -67,8 +67,8 @@ window.onload = function() {
   function imageUploaded(){
     if (imageInput.files.length != 0){
       for (let i = 0; i < imageInput.files.length; i++) {
+        debugger;
         const img = imageInput.files[i];
-        const name = img.name;
         var reader = new FileReader();
         reader.onload = function(){
           var dataURL = reader.result;

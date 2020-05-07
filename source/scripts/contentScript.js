@@ -74,12 +74,7 @@ function toMask(personOrPartSegmentation) {
 
 function realVideoAdded(video) {
   state.video = video;
-  function outputsize() {
-    state.backgroundImage.width = state.video.width
-    state.backgroundImage.height = state.video.height
-   }   
-  new ResizeObserver(outputsize).observe(state.video)
-
+ 
   video.onloadedmetadata = function () {
     var background = new Image();
     state.backgroundImage = background;
@@ -91,6 +86,13 @@ function realVideoAdded(video) {
     background.height = state.video.height;
     background.width = state.video.width;
     background.crossOrigin = "Anonymous";
+
+    function outputsize() {
+      state.backgroundImage.width = state.video.width
+      state.backgroundImage.height = state.video.height
+     }   
+    new ResizeObserver(outputsize).observe(state.video)
+
     background.onload = function () {
       var imageCanvas = document.createElement("canvas");
       imageCanvas.width = background.width;
@@ -120,7 +122,7 @@ async function start() {
 async function loadState() {
   state.gameIsOn = (await browser.storage.sync.get(["gameIsOn"])).gameIsOn;
   state.backgroundSrc = (
-    await browser.storage.sync.get(["backgroundSrc"])
+    await browser.storage.local.get(["backgroundSrc"])
   ).backgroundSrc;
 }
 
