@@ -1,6 +1,5 @@
 import * as bodyPix from "@tensorflow-models/body-pix";
 import browser from "webextension-polyfill";
-import { debug } from "webpack";
 
 const state = {
   video: null,
