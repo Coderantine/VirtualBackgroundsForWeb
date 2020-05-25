@@ -18,7 +18,7 @@ Then run the following:
 - `yarn run build:chrome` to build chrome extension
 
 - **Load extension in browser**
-  - Go to the browser address bar and type `chrome://extensions`
-  - Check the `Developer Mode` button to enable it.
-  - Click on the `Load Unpacked Extension…` button.
-  - Select your extension’s extracted directory.
+- Go to the browser address bar and type `chrome://extensions`
+- Check the `Developer Mode` button to enable it.
+- Click on the `Load Unpacked Extension…` button.
+- Select your extension’s extracted directory.
