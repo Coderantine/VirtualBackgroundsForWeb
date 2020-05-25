@@ -37,5 +37,5 @@ const photos = [
 browser.runtime.onInstalled.addListener(async () => {
     browser.storage.local.set({'photos': photos});
     browser.storage.sync.set({'gameIsOn': true});
-    browser.storage.local.set({'backgroundSrc': photos[0].src});
+    browser.storage.local.set({'backgroundSrc': photos[0]});
 });

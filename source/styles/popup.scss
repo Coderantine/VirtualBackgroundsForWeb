@@ -49,8 +49,14 @@ body{
     display: block;
     margin: auto;
     margin-bottom: 1rem;
-    object-fit: cover;
     cursor: pointer;
+  }
+
+  .image_item_inner{
+    height: 10rem;
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
   }
 
   .image_item:hover{
@@ -60,6 +66,9 @@ body{
 
   .selected_image{
     border: 3px solid #00796b;
+    .image_item_inner{
+      border-radius: 5px;
+    }
   }
 }
 

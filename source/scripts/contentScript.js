@@ -9,10 +9,11 @@ const state = {
   backgroundImage: null,
   backgroundSrc: null,
   gameIsOn: true,
+  maskingFrameCounter: 0,
+  maskCache: null,
 };
 
 async function overrideGetUserMedia() {
-  
   var canvas = document.createElement("canvas");
   canvas.setAttribute("id", "sourceCanvas");
   canvas.setAttribute("style", "display:none");
@@ -74,7 +75,7 @@ function toMask(personOrPartSegmentation) {
 
 function realVideoAdded(video) {
   state.video = video;
- 
+
   video.onloadedmetadata = function () {
     var background = new Image();
     state.backgroundImage = background;
@@ -88,10 +89,10 @@ function realVideoAdded(video) {
     background.crossOrigin = "Anonymous";
 
     function outputsize() {
-      state.backgroundImage.width = state.video.width
-      state.backgroundImage.height = state.video.height
-     }   
-    new ResizeObserver(outputsize).observe(state.video)
+      state.backgroundImage.width = state.video.width;
+      state.backgroundImage.height = state.video.height;
+    }
+    new ResizeObserver(outputsize).observe(state.video);
 
     background.onload = function () {
       var imageCanvas = document.createElement("canvas");
@@ -109,6 +110,13 @@ function realVideoAdded(video) {
       segmentBodyInRealTime();
     };
 
+    if (state.backgroundSrc.includes("unsplash")){
+      state.backgroundSrc =
+      state.backgroundSrc.split("&w=")[0] +
+      "&fit=crop&w=" +
+      state.video.width;
+    }
+
     background.src = state.backgroundSrc;
   };
 }
@@ -121,9 +129,10 @@ async function start() {
 
 async function loadState() {
   state.gameIsOn = (await browser.storage.sync.get(["gameIsOn"])).gameIsOn;
-  state.backgroundSrc = (
-    await browser.storage.local.get(["backgroundSrc"])
-  ).backgroundSrc;
+  debugger;
+  let backImage = (await browser.storage.local.get(["backgroundSrc"]))
+    .backgroundSrc;
+  state.backgroundSrc = backImage.src;
 }
 
 function injectMediaSourceSwap() {
@@ -139,21 +148,15 @@ function injectMediaSourceSwap() {
 function segmentBodyInRealTime() {
   async function bodySegmentationFrame() {
     if (state.gameIsOn) {
-      var multiPersonSegmentation = await estimateSegmentation();
-      if (multiPersonSegmentation) {
-        const mask = toMask(multiPersonSegmentation);
-
-        // const ctx = state.canvas.getContext("2d");
-        // ctx.globalAlpha = 1;
-        // ctx.save();
-        // ctx.drawImage(state.video, 0, 0);
-        // bodyPix.drawi
-        // ctx.globalCompositeOperation = "source-in";
-        // ctx.putImageData(mask,0,0);
-        
-        // ctx.restore();
-
-        bodyPix.drawMask(state.canvas, state.video, mask, 1, 0, false);
+      if (state.maskingFrameCounter == 0) {
+        debugger;
+        var multiPersonSegmentation = await estimateSegmentation();
+        state.maskCache = toMask(multiPersonSegmentation);
+      }
+      bodyPix.drawMask(state.canvas, state.video, state.maskCache, 1, 0, false);
+      state.maskingFrameCounter++;
+      if (state.maskingFrameCounter == 40) {
+        state.maskingFrameCounter = 0;
       }
     } else {
       var ctx = state.canvas.getContext("2d");
@@ -170,7 +173,7 @@ async function loadBodyPix() {
   state.net = await bodyPix.load({
     architecture: "MobileNetV1",
     outputStride: 16,
-    multiplier: 0.75,
+    multiplier: 1,
     quantBytes: 2,
   });
 }
@@ -189,10 +192,11 @@ browser.storage.onChanged.addListener(function (changes) {
     debugger;
     var backgroundImg = changes["backgroundSrc"].newValue;
     var backgroundImgSource = backgroundImg.src;
-    if (!backgroundImg.isCustom){
-      backgroundImgSource = backgroundImgSource.split("&w=")[0] +
-                                              "&fit=crop&w=" +
-                                              state.video.width;
+    if (!backgroundImg.isCustom) {
+      backgroundImgSource =
+        backgroundImgSource.split("&w=")[0] +
+        "&fit=crop&w=" +
+        state.video.width;
     }
 
     state.backgroundSrc = backgroundImgSource;

@@ -7,6 +7,7 @@
   "short_name": "VirtualBackgroundsForMeet",
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "https://meet.google.com/"
   ],
   "__chrome|firefox__author": "Coderantine",

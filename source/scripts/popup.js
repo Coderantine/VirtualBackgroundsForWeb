@@ -7,7 +7,7 @@ const createImageGallery = images => {
   photos = images;
   let output = ""
   for (var i = 0; i< images.length; i++){
-    output += `<img src="${images[i].src}" isCustom="${images[i].isCustom}" class="image_item" />`
+    output += `<div class="image_item"><img src="${images[i].src}" isCustom="${images[i].isCustom}" class="image_item_inner"/></div>`
   }
 
   image_container.innerHTML = output
@@ -16,8 +16,7 @@ const createImageGallery = images => {
 const changeImage = e => {
   if (e.target.src) {
     clearExistingSelection();
-    e.target.classList.add("selected_image");
-    debugger;
+    e.target.parentElement.classList.add("selected_image");
     browser.storage.local.set({"backgroundSrc": {"src":e.target.src, "isCustom":e.target.getAttribute("isCustom")}});
   }
 }
@@ -29,9 +28,20 @@ function loadPhotos(){
  .then(res =>{
    clearExistingSelection();
    debugger;
+   function getChildImage(element){
+    for (var i = 0; i < element.childNodes.length; i++) {
+        if (element.childNodes[i].tagName == "IMG") {
+          return element.childNodes[i];
+        }        
+    }
+  }
    var existingImages = document.getElementsByClassName("image_item");
+   debugger;
+
     for (var i = 0; i < existingImages.length; i++) {
-      if (existingImages[i].src.includes(res.backgroundSrc.src)){
+      var childImage = getChildImage(existingImages[i]);
+      
+      if (childImage.src.includes(res.backgroundSrc.src)){
         existingImages[i].classList.add("selected_image");
         return;
       }
